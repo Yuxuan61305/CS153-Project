@@ -7,13 +7,21 @@ import {
   Button,
   ScrollView,
   Image,
+  Modal,
+  Alert,
+  Pressable,
+  TouchableOpacity
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
+import { normalizeColor } from 'react-native-reanimated/lib/typescript/Colors';
 
 export default function App() {
   const [expenses, setExpenses] = useState([
-    { id: '1', date: '2025-06-01', tag: 'Food', amount: '$15' },
+    { id: '1', date: '2025-06-01', tag: 'Name', amount: '$15' },
     { id: '2', date: '2025-06-02', tag: 'Transport', amount: '$10' },
     { id: '3', date: '2025-06-03', tag: 'Clothes', amount: '$20' },
   ]);
@@ -21,25 +29,97 @@ export default function App() {
   const [newDate, setNewDate] = useState('');
   const [newTag, setNewTag] = useState('');
   const [newAmount, setNewAmount] = useState('');
+  const [modalVisible, setModalVisible] = useState(false)
   const router = useRouter();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleAddExpense = () => {
-    if (newDate && newTag && newAmount) {
-      const newExpense = {
-        id: (expenses.length + 1).toString(),
-        date: newDate,
-        tag: newTag,
-        amount: `$${newAmount}`,
-      };
-      setExpenses([...expenses, newExpense]);
-      setNewDate('');
-      setNewTag('');
-      setNewAmount('');
-    }
+    setModalVisible(true);
+  };
+
+  const UpdateList = (newExpense) => {
+    setExpenses((prevExpenses) => {
+      const updated = [newExpense, ...prevExpenses];
+      if (updated.length > 3) {
+        updated.pop(); 
+      }
+      return updated;
+    });
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>New Expense</Text>
+
+            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+              <Text>{newDate || 'Select Date'}</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={newDate ? new Date(newDate) : new Date()}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) {
+                    const formatted = selectedDate.toISOString().split('T')[0];
+                    setNewDate(formatted);
+                  }
+                }}
+              />
+            )}
+            <TextInput
+              placeholder="Tag (e.g. Food)"
+              value={newTag}
+              onChangeText={setNewTag}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Amount (e.g. 15)"
+              value={newAmount}
+              onChangeText={setNewAmount}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
+              <Button title="Cancel" onPress={() => setModalVisible(false)} />
+              <Button
+                title="Add"
+                onPress={() => {
+                  if (!newDate || !newTag || !newAmount) {
+                    alert("Please fill all fields correctly.");
+                    return;
+                  }
+
+                  const newExpense = {
+                    id: Date.now().toString(),
+                    date: newDate,
+                    tag: newTag,
+                    amount: `$${parseFloat(newAmount).toFixed(0)}`
+                  };
+                  
+                  UpdateList(newExpense);
+
+                  setNewDate('');
+                  setNewTag('');
+                  setNewAmount('');
+                  setModalVisible(false);
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
       <Text style={styles.title}>Monthly Expense Breakdown</Text>
       <View style={styles.pieChart}>
         <Image
@@ -49,7 +129,7 @@ export default function App() {
         />
       </View>
 
-      
+
       <Text style={styles.totalLabel}>
         Total Monthly Expenses: $
         <TextInput
@@ -59,7 +139,7 @@ export default function App() {
         />
       </Text>
 
-      
+
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Date</Text>
         <Text style={styles.headerText}>Tag</Text>
@@ -74,41 +154,14 @@ export default function App() {
         </View>
       ))}
 
-      
+
       <View style={styles.buttonContainer}>
-       <Button title="View More" onPress={() => router.push('(tab)/about')} />
+        <Button title="View More" onPress={() => router.push('(tab)/about')} />
       </View>
 
 
-      
-      <Text style={styles.title}>Add New Expense</Text>
-      <View style={styles.inputHeaderRow}>
-        <Text style={styles.inputHeaderText}>Date</Text>
-        <Text style={styles.inputHeaderText}>Tag</Text>
-        <Text style={styles.inputHeaderText}>Amount</Text>
-      </View>
 
-      <View style={styles.inputRow}>
-        <TextInput
-          placeholder="Date"
-          value={newDate}
-          onChangeText={setNewDate}
-          style={styles.expenseInput}
-        />
-        <TextInput
-          placeholder="Tag"
-          value={newTag}
-          onChangeText={setNewTag}
-          style={styles.expenseInput}
-        />
-        <TextInput
-          placeholder="Amount"
-          value={newAmount}
-          onChangeText={setNewAmount}
-          style={styles.expenseInput}
-          keyboardType="numeric"
-        />
-      </View>
+
       <View style={styles.buttonContainer}>
         <Button title="Add Expense" onPress={handleAddExpense} />
       </View>
@@ -144,12 +197,6 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 18,
     marginBottom: 12,
-  },
-  input: {
-    borderBottomWidth: 1,
-    width: 80,
-    fontSize: 16,
-    textAlign: 'center',
   },
   tableHeader: {
     flexDirection: 'row',
@@ -197,21 +244,42 @@ const styles = StyleSheet.create({
     width: '60%',
   },
   inputHeaderRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  marginTop: 12,
-  paddingBottom: 4,
-  borderBottomWidth: 1,
-  borderColor: '#ccc',
-},
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
   button: {
     fontSize: 20,
     textDecorationLine: 'underline',
     color: '#fff',
   },
-inputHeaderText: {
-  fontWeight: 'bold',
-  width: '30%',
-  textAlign: 'center',
-},
+  inputHeaderText: {
+    fontWeight: 'bold',
+    width: '30%',
+    textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 10,
+  }
+
 });
