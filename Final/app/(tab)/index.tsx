@@ -1,23 +1,23 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
   Button,
-  ScrollView,
   Image,
   Modal,
-  Alert,
-  Pressable,
-  TouchableOpacity
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { Link } from 'expo-router';
-import { useRouter } from 'expo-router';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
-import { normalizeColor } from 'react-native-reanimated/lib/typescript/Colors';
+
+import CustomPieChart from '@/components/CustomPieChart';
+import AddExpenseModal from '@/components/AddExpenseModal';
+import { useExpenses } from '@/app/(tab)/context';
+
+
 
 export default function App() {
   const [expenses, setExpenses] = useState([
@@ -26,20 +26,22 @@ export default function App() {
     { id: '3', date: '2025-06-03', tag: 'Clothes', amount: '$20' },
   ]);
 
-  const [newDate, setNewDate] = useState('');
-  const [newTag, setNewTag] = useState('');
-  const [newAmount, setNewAmount] = useState('');
+  const { addExpense } = useExpenses()
+
+   const series = [
+    { name: 'Yellow', population: 400, color: '#fbd203', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+    { name: 'Orange', population: 321, color: '#ffb300', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+    { name: 'Dark Orange', population: 185, color: '#ff9100', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+    { name: 'Red', population: 123, color: '#ff6c00', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+  ];
+  
   const [modalVisible, setModalVisible] = useState(false)
   const router = useRouter();
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const handleAddExpense = () => {
-    setModalVisible(true);
-  };
 
-  const UpdateList = (newExpense) => {
+  const UpdateList = (useExpenses: any) => {
     setExpenses((prevExpenses) => {
-      const updated = [newExpense, ...prevExpenses];
+      const updated = [useExpenses, ...prevExpenses];
       if (updated.length > 3) {
         updated.pop(); 
       }
@@ -47,88 +49,18 @@ export default function App() {
     });
   };
 
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>New Expense</Text>
 
-            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-              <Text>{newDate || 'Select Date'}</Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={newDate ? new Date(newDate) : new Date()}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(false);
-                  if (selectedDate) {
-                    const formatted = selectedDate.toISOString().split('T')[0];
-                    setNewDate(formatted);
-                  }
-                }}
-              />
-            )}
-            <TextInput
-              placeholder="Tag (e.g. Food)"
-              value={newTag}
-              onChangeText={setNewTag}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Amount (e.g. 15)"
-              value={newAmount}
-              onChangeText={setNewAmount}
-              keyboardType="numeric"
-              style={styles.input}
-            />
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
-              <Button title="Cancel" onPress={() => setModalVisible(false)} />
-              <Button
-                title="Add"
-                onPress={() => {
-                  if (!newDate || !newTag || !newAmount) {
-                    alert("Please fill all fields correctly.");
-                    return;
-                  }
-
-                  const newExpense = {
-                    id: Date.now().toString(),
-                    date: newDate,
-                    tag: newTag,
-                    amount: `$${parseFloat(newAmount).toFixed(0)}`
-                  };
-                  
-                  UpdateList(newExpense);
-
-                  setNewDate('');
-                  setNewTag('');
-                  setNewAmount('');
-                  setModalVisible(false);
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <AddExpenseModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        onAddExpense={addExpense}
+      />
       <Text style={styles.title}>Monthly Expense Breakdown</Text>
-      <View style={styles.pieChart}>
-        <Image
-          source={require('./PieChart.png')}
-          style={styles.pieImage}
-          resizeMode="contain"
-        />
-      </View>
-
+      
+       <CustomPieChart title="" data={series} />
 
       <Text style={styles.totalLabel}>
         Total Monthly Expenses: $
@@ -160,10 +92,8 @@ export default function App() {
       </View>
 
 
-
-
       <View style={styles.buttonContainer}>
-        <Button title="Add Expense" onPress={handleAddExpense} />
+        <Button title="Add Expense" onPress={()=>setModalVisible(true)} />
       </View>
     </ScrollView>
   );

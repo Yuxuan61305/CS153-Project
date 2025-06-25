@@ -1,9 +1,10 @@
 import { Stack } from 'expo-router';
+import { ExpenseProvider } from '@/app/(tab)/context';  
 
 export default function RootLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <ExpenseProvider>
+      <Stack />
+    </ExpenseProvider>
   );
 }

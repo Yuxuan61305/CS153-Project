@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { ExpenseProvider } from '@/app/(tab)/context';
 
 
 export default function TabLayout() {

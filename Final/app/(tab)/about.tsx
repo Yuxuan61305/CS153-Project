@@ -1,86 +1,74 @@
 import React from 'react';
-import { ScrollView, Text, View, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import { useExpenses } from '@/app/(tab)/context';
 
-// Helper to generate dummy records
-const generateRandomExpenses = () => {
-  const months = ['2025-06', '2025-05', '2025-04'];
-  const tags = ['Food', 'Transport', 'Clothes', 'Books', 'Health'];
+const about = () => {
+  console.log('Expenses context:', useExpenses());
+  const { expenses } = useExpenses();
 
-  return months.map((month) => {
-    const entries = Array.from({ length: 5 }, (_, i) => {
-      const date = `${month}-${String(i + 1).padStart(2, '0')}`;
-      const tag = tags[Math.floor(Math.random() * tags.length)];
-      const amount = `$${(Math.random() * 40 + 5).toFixed(0)}`;
-      return { date, tag, amount };
-    });
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.text}><Text style={styles.label}>Date:</Text> {item.date}</Text>
+      <Text style={styles.text}><Text style={styles.label}>Tag:</Text> {item.tag}</Text>
+      <Text style={styles.text}><Text style={styles.label}>Amount:</Text> {item.amount}</Text>
 
-    return { month, entries };
-  });
-};
-
-export default function ViewMoreScreen() {
-  const groupedExpenses = generateRandomExpenses();
+      {item.imageUrl && (
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      )}
+    </View>
+  );
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {groupedExpenses.map(({ month, entries }) => (
-        <View key={month} style={styles.section}>
-          <Text style={styles.monthLabel}>{month}</Text>
-
-          <View style={styles.tableHeader}>
-            <Text style={styles.headerText}>Date</Text>
-            <Text style={styles.headerText}>Tag</Text>
-            <Text style={styles.headerText}>Amount</Text>
-          </View>
-
-          {entries.map((item, index) => (
-            <View key={index} style={styles.tableRow}>
-              <Text style={styles.rowText}>{item.date}</Text>
-              <Text style={styles.rowText}>{item.tag}</Text>
-              <Text style={styles.rowText}>{item.amount}</Text>
-            </View>
-          ))}
-        </View>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      {expenses.length === 0 ? (
+        <Text style={styles.emptyText}>No expenses recorded yet.</Text>
+      ) : (
+        <FlatList
+          data={expenses}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
+      )}
+    </View>
   );
-}
+};
+
+export default about;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingBottom: 40,
+    flex: 1,
+    padding: 15,
+    backgroundColor: '#fff',
   },
-  section: {
-    marginBottom: 30,
+  card: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 8,
+    elevation: 2,
   },
-  monthLabel: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
+  text: {
+    marginBottom: 5,
   },
-  tableHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-    paddingBottom: 6,
-    marginBottom: 6,
-  },
-  headerText: {
-    width: '30%',
-    textAlign: 'center',
+  label: {
     fontWeight: 'bold',
   },
-  tableRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: 0.5,
-    borderColor: '#eee',
-  },
-  rowText: {
-    width: '30%',
+  emptyText: {
     textAlign: 'center',
+    marginTop: 50,
+    fontSize: 16,
+    color: '#666',
+  },
+  image: {
+    width: '100%',
+    height: 150,
+    marginTop: 10,
+    borderRadius: 5,
   },
 });
