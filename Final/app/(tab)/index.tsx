@@ -1,90 +1,44 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Button,
-  Image,
-  Modal,
-  ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 
-import CustomPieChart from '@/components/CustomPieChart';
-import AddExpenseModal from '@/components/AddExpenseModal';
 import { useExpenses } from '@/app/(tab)/context';
+import AddExpenseModal from '@/components/AddExpenseModal';
+import { default as ExpensePieChart } from '@/components/ExpensePieChart';
+import LatestExpensesTable from '@/components/LatestExpenseTable';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 
 
 export default function App() {
-  const [expenses, setExpenses] = useState([
-    { id: '1', date: '2025-06-01', tag: 'Name', amount: '$15' },
-    { id: '2', date: '2025-06-02', tag: 'Transport', amount: '$10' },
-    { id: '3', date: '2025-06-03', tag: 'Clothes', amount: '$20' },
-  ]);
-
   const { addExpense } = useExpenses()
 
-   const series = [
-    { name: 'Yellow', population: 400, color: '#fbd203', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-    { name: 'Orange', population: 321, color: '#ffb300', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-    { name: 'Dark Orange', population: 185, color: '#ff9100', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-    { name: 'Red', population: 123, color: '#ff6c00', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-  ];
-  
+
   const [modalVisible, setModalVisible] = useState(false)
   const router = useRouter();
 
 
-  const UpdateList = (useExpenses: any) => {
-    setExpenses((prevExpenses) => {
-      const updated = [useExpenses, ...prevExpenses];
-      if (updated.length > 3) {
-        updated.pop(); 
-      }
-      return updated;
-    });
-  };
-
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-
+    <View>
       <AddExpenseModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         onAddExpense={addExpense}
       />
-      <Text style={styles.title}>Monthly Expense Breakdown</Text>
-      
-       <CustomPieChart title="" data={series} />
-
-      <Text style={styles.totalLabel}>
-        Total Monthly Expenses: $
-        <TextInput
-          placeholder="..."
-          style={styles.input}
-          keyboardType="numeric"
-        />
-      </Text>
 
 
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerText}>Date</Text>
-        <Text style={styles.headerText}>Tag</Text>
-        <Text style={styles.headerText}>Amount</Text>
+     <View>
+        <ExpensePieChart />
       </View>
-
-      {expenses.map((item) => (
-        <View key={item.id} style={styles.tableRow}>
-          <Text style={styles.rowText}>{item.date}</Text>
-          <Text style={styles.rowText}>{item.tag}</Text>
-          <Text style={styles.rowText}>{item.amount}</Text>
-        </View>
-      ))}
+      <View>
+        <LatestExpensesTable />
+      </View>
 
 
       <View style={styles.buttonContainer}>
@@ -93,9 +47,13 @@ export default function App() {
 
 
       <View style={styles.buttonContainer}>
-        <Button title="Add Expense" onPress={()=>setModalVisible(true)} />
+        <TouchableOpacity style={styles.plusButton} onPress={() => setModalVisible(true)}>
+          <Icon name="add" size={30} color="white" />
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+
+
+    </View>
   );
 }
 
@@ -172,6 +130,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignSelf: 'center',
     width: '60%',
+    alignItems:'center',
   },
   inputHeaderRow: {
     flexDirection: 'row',
@@ -210,6 +169,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 8,
     marginTop: 10,
-  }
+  },
+   plusButton: {
+    backgroundColor: '#2196F3',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
 });

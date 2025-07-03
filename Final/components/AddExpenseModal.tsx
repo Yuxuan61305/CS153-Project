@@ -1,13 +1,54 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Button, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
+import {
+  Button,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+// Category list
+const expenseCategories = [
+  'Food & Drink',
+  'Transportation',
+  'Housing',
+  'Health & Fitness',
+  'Entertainment',
+  'Shopping',
+  'Education',
+  'Personal Care',
+  'Travel',
+  'Insurance',
+  'Miscellaneous',
+];
+
+// Category icons and colors
+const categoryIcons = {
+  'Food & Drink': { name: 'fast-food-outline', color: '#FF9800' },
+  'Transportation': { name: 'car-outline', color: '#03A9F4' },
+  'Housing': { name: 'home-outline', color: '#2196F3' },
+  'Health & Fitness': { name: 'barbell-outline', color: '#8BC34A' },
+  'Entertainment': { name: 'film-outline', color: '#FF5722' },
+  'Shopping': { name: 'cart-outline', color: '#9C27B0' },
+  'Education': { name: 'school-outline', color: '#F44336' },
+  'Personal Care': { name: 'happy-outline', color: '#FFC107' },
+  'Travel': { name: 'airplane-outline', color: '#00BCD4' },
+  'Insurance': { name: 'shield-checkmark-outline', color: '#607D8B' },
+  'Miscellaneous': { name: 'ellipsis-horizontal-outline', color: '#9E9E9E' },
+};
 
 const AddExpenseModal = ({ modalVisible, setModalVisible, onAddExpense }) => {
-  
   const [newDate, setNewDate] = useState('');
   const [newTag, setNewTag] = useState('');
   const [newAmount, setNewAmount] = useState('');
+  const [newDescription, setNewDescription] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCategoryList, setShowCategoryList] = useState(false);
 
   const handleAdd = () => {
     if (!newDate || !newTag || !newAmount) {
@@ -20,9 +61,10 @@ const AddExpenseModal = ({ modalVisible, setModalVisible, onAddExpense }) => {
       date: newDate,
       tag: newTag,
       amount: `$${parseFloat(newAmount).toFixed(0)}`,
+      description: newDescription,
     };
 
-    onAddExpense(newExpense);  // <-- Call the global addExpense function
+    onAddExpense(newExpense);
     resetFields();
   };
 
@@ -30,7 +72,14 @@ const AddExpenseModal = ({ modalVisible, setModalVisible, onAddExpense }) => {
     setNewDate('');
     setNewTag('');
     setNewAmount('');
+    setNewDescription('');
+    setShowCategoryList(false);
     setModalVisible(false);
+  };
+
+  const handleSelectCategory = (category) => {
+    setNewTag(category);
+    setShowCategoryList(false);
   };
 
   return (
@@ -64,13 +113,38 @@ const AddExpenseModal = ({ modalVisible, setModalVisible, onAddExpense }) => {
             />
           )}
 
-          {/* Tag */}
-          <TextInput
-            placeholder="Tag (e.g., Food)"
-            value={newTag}
-            onChangeText={setNewTag}
+          {/* Category Picker */}
+          <TouchableOpacity
+            onPress={() => setShowCategoryList(!showCategoryList)}
             style={styles.input}
-          />
+          >
+            <Text>{newTag || 'Select Tag'}</Text>
+          </TouchableOpacity>
+
+          {showCategoryList && (
+            <ScrollView style={styles.categoryList}>
+              {expenseCategories.map((category) => {
+                const iconData = categoryIcons[category] || { name: 'pricetag-outline', color: '#555' };
+                return (
+                  <TouchableOpacity
+                    key={category}
+                    onPress={() => handleSelectCategory(category)}
+                    style={styles.categoryItem}
+                  >
+                    <View style={styles.categoryRow}>
+                      <Ionicons
+                        name={iconData.name}
+                        size={18}
+                        color={iconData.color}
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text>{category}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
 
           {/* Amount */}
           <TextInput
@@ -79,6 +153,16 @@ const AddExpenseModal = ({ modalVisible, setModalVisible, onAddExpense }) => {
             onChangeText={setNewAmount}
             keyboardType="numeric"
             style={styles.input}
+            placeholderTextColor={'black'}
+          />
+
+          {/* Description */}
+          <TextInput
+            placeholder="Description (e.g., McDonald's)"
+            value={newDescription}
+            onChangeText={setNewDescription}
+            style={styles.input}
+            placeholderTextColor={'black'}
           />
 
           {/* Buttons */}
@@ -106,6 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     elevation: 5,
+    maxHeight: '90%',
   },
   modalTitle: {
     fontWeight: 'bold',
@@ -118,6 +203,23 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 8,
     borderRadius: 5,
+    backgroundColor:'transparent',
+  },
+  categoryList: {
+    maxHeight: 150,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  categoryItem: {
+    padding: 10,
+    borderBottomWidth: 0.5,
+    borderColor: '#ddd',
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   buttonRow: {
     flexDirection: 'row',

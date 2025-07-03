@@ -1,8 +1,5 @@
-import { Tabs } from 'expo-router';
-
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { ExpenseProvider } from '@/app/(tab)/context';
-
+import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
@@ -14,21 +11,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Finant',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
           ),
         }}
       />
       <Tabs.Screen
-        name="viewmore"
+        name="about"
         options={{
-          title: 'About',
+          title: 'History',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+            <Ionicons name={focused ? 'time' : 'time-outline'} color={color} size={24} />
           ),
         }}
       />
     </Tabs>
   );
 }
+
