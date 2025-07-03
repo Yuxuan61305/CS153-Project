@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-// Icon mapping
+
 const categoryIcons = {
   'Food & Drink': { name: 'fast-food-outline', color: '#FF9800' },
   'Transportation': { name: 'car-outline', color: '#03A9F4' },

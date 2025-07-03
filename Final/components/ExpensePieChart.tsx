@@ -38,7 +38,7 @@ const ExpensePieChart = () => {
 
   return (
     <View style={styles.container}>
-      {/* ⭕ Manual offset wrapper */}
+      
       <View style={styles.chartWrapper}>
         <PieChart
           data={pieData}
@@ -49,13 +49,13 @@ const ExpensePieChart = () => {
           }}
           accessor="population"
           backgroundColor="transparent"
-          paddingLeft="0" // disables default internal padding
+          paddingLeft="0" 
           hasLegend={false}
           absolute
         />
       </View>
 
-      {/* ✅ Custom Legend */}
+      
       <View style={styles.legendContainer}>
         {pieData.map((slice, index) => (
           <View key={index} style={styles.legendItem}>
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   chartWrapper: {
     width: chartWidth,
-    marginLeft: (screenWidth - chartWidth) / 0.22, // 💡 manually center
+    marginLeft: (screenWidth - chartWidth) / 0.22, 
   },
   legendContainer: {
     marginTop: 16,

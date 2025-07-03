@@ -7,7 +7,7 @@ export const ExpenseProvider = ({ children }) => {
   const [expenses, setExpenses] = useState([]);
   const STORAGE_KEY = '@expenses_data';
 
-  // Load expenses from AsyncStorage on first app load
+ 
   useEffect(() => {
     const loadExpenses = async () => {
       try {
@@ -23,7 +23,7 @@ export const ExpenseProvider = ({ children }) => {
     loadExpenses();
   }, []);
 
-  // Save expenses to AsyncStorage whenever expenses change
+
   useEffect(() => {
     const saveExpenses = async () => {
       try {
@@ -36,7 +36,7 @@ export const ExpenseProvider = ({ children }) => {
     saveExpenses();
   }, [expenses]);
 
-  // Helper: Sort by latest date first
+ 
   const sortByDateDesc = (expensesArray) => {
     return [...expensesArray].sort((a, b) => {
       const dateA = new Date(a.date);
